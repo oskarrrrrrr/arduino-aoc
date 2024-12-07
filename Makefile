@@ -15,7 +15,7 @@ all:
 
 .PHONY: arduino-all
 arduino-all:
-	$(MAKE) compile
+	$(MAKE) arduino
 	$(MAKE) upload
 	$(MAKE) monitor
 
@@ -32,7 +32,7 @@ upload:
 
 .PHONY: upload
 monitor:
-	cd $(BUILD_DIR); arduino-cli monitor --quiet --port $(PORT)
+	cd $(BUILD_DIR); arduino-cli monitor --raw --quiet --port $(PORT)
 
 .PHONY: local
 local:

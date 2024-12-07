@@ -1,4 +1,4 @@
-#define AOC_2024_02
+#define AOC_2024_03
 #include "aoc.h"
 
 const unsigned long INACTIVITY_TRESHOLD = 100;
