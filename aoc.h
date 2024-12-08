@@ -1,4 +1,7 @@
 #include <stddef.h>
+#include <stdint.h>
+
+typedef uint8_t u8;
 
 #ifdef AOC_2024_01
 
@@ -450,5 +453,129 @@ void solve(int *p1, int *p2) {
 }
 
 #endif // AOC_2024_04
+
+// =============================================================================
+
+#ifdef AOC_2024_05
+
+int reading_rules;
+char prev_byte;
+
+typedef struct { u8 prev; u8 next; } Rule;
+Rule rules[2000];
+size_t rules_count;
+
+size_t current_rule;
+size_t char_in_line;
+
+u8 curr_update[100];
+size_t curr_update_len;
+
+int result1;
+int result2;
+
+void reset() {
+    reading_rules = 1;
+    prev_byte = 0;
+    rules_count = 0;
+    current_rule = 0;
+    char_in_line = 0;
+    curr_update_len = 0;
+    result1 = 0;
+    result2 = 0;
+}
+
+int find_err(size_t *i1, size_t *i2) {
+    for (size_t i = 0; i < curr_update_len; i++) {
+        for (size_t j = i+1; j < curr_update_len; j++) {
+            for (size_t r = 0; r < rules_count; r++) {
+                if (
+                    rules[r].next == curr_update[i]
+                    && rules[r].prev == curr_update[j]
+                ) {
+                    *i1 = i;
+                    *i2 = j;
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+// TODO: this doesn't work on Arduino
+void part1() {
+    size_t i1, i2;
+    if (!find_err(&i1, &i2)) {
+        result1 += curr_update[curr_update_len/2];
+    }
+}
+
+// TODO: this is too slow for Arduino
+void part2() {
+    int err_count = 0;
+    size_t i, j;
+    while (find_err(&i, &j)) {
+        u8 temp = curr_update[i];
+        curr_update[i] = curr_update[j];
+        curr_update[j] = temp;
+        err_count++;
+    }
+    if (err_count > 0) {
+        result2 += curr_update[curr_update_len/2];
+    }
+}
+
+void on_byte(char byte) {
+    if (byte == '\n') {
+        if (!reading_rules) {
+            part1();
+            // part2();
+            curr_update_len = 0;
+        }
+        char_in_line = 0;
+        if (prev_byte == '\n') {
+            rules_count = current_rule;
+            reading_rules = 0;
+        }
+    } else if (reading_rules) {
+        Rule *rule = &rules[current_rule];
+        switch (char_in_line) {
+        case 0:
+            rule->prev = byte - '0';
+            rule->next = 0;
+            break;
+        case 1:
+            rule->prev = (rule->prev * 10) + (byte - '0');
+            break;
+        case 3:
+            rule->next = byte - '0';
+            break;
+        case 4:
+            rule->next = (rule->next * 10) + (byte - '0');
+            current_rule++;
+            break;
+        }
+        char_in_line++;
+    } else {
+        if (byte == ',') {
+            // skip
+        } else if (prev_byte == ',' || prev_byte == '\n') {
+            curr_update_len++;
+            curr_update[curr_update_len - 1] = byte - '0';
+        } else {
+            curr_update[curr_update_len - 1] *= 10;
+            curr_update[curr_update_len - 1] += byte - '0';
+        }
+    }
+    prev_byte = byte;
+}
+
+void solve(int *p1, int *p2) {
+    *p1 = result1;
+    *p2 = result2;
+}
+
+#endif // AOC_2024_05
 
 // =============================================================================
