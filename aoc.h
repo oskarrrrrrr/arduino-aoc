@@ -294,3 +294,161 @@ void solve(int *part1, int *part2) {
 #endif // AOC_2024_03
 
 // =============================================================================
+
+#ifdef AOC_2024_04
+
+typedef enum { X, M, A, S } XMAS;
+#define XMAS_SIZE 2 // (bits)
+
+#define CELL_COUNT 4000
+#define CELL_SIZE (sizeof(int))
+#define CELL_CAPACITY (CELL_SIZE * 8 / XMAS_SIZE)
+
+int text[CELL_COUNT];
+size_t write_cursor;
+size_t line_len;
+size_t lines;
+
+char XMAS_char(XMAS v) {
+    switch (v) {
+    case X: return 'X';
+    case M: return 'M';
+    case A: return 'A';
+    case S: return 'S';
+    }
+    return '?';
+}
+
+void get_cell_and_offset(int row, int col, int *cell, int *offset) {
+    int idx = (row * line_len) + col;
+    *cell = idx / CELL_CAPACITY;
+    *offset = idx % CELL_CAPACITY;
+}
+
+void set_in_cell(int *cell, int offset, XMAS v) {
+    *cell &= (-1) | (0b11 << (2 * offset));
+    *cell |= v << (2 * offset);
+}
+
+XMAS get_from_cell(int cell, int offset) {
+    return (XMAS)((cell >> (2 * offset)) & 0b11);
+}
+
+void set_next(XMAS v) {
+    int cell_num = write_cursor / CELL_CAPACITY;
+    int *cell = &text[cell_num];
+    int offset = write_cursor % CELL_CAPACITY;
+    set_in_cell(cell, offset, v);
+    write_cursor++;
+}
+
+XMAS get(size_t row, size_t col) {
+    int cell, offset;
+    get_cell_and_offset(row, col, &cell, &offset);
+    XMAS v = get_from_cell(text[cell], offset);
+    return v;
+}
+
+void reset() {
+    write_cursor = 0;
+    line_len = 0;
+    lines = 0;
+}
+
+void on_byte(char byte) {
+    switch (byte) {
+    case 'X': set_next(X); break;
+    case 'M': set_next(M); break;
+    case 'A': set_next(A); break;
+    case 'S': set_next(S); break;
+    case '\n':
+        if (line_len == 0) {
+            line_len = write_cursor;
+        }
+        lines++;
+    }
+}
+
+int in_bounds(int line, int col) {
+    return (0 <= line && line < lines) && (0 <= col && col < line_len);
+}
+
+void translate(int *line, int *col, int vec[2]) {
+    *line += vec[0];
+    *col += vec[1];
+}
+
+int check_vec(int line, int col, int vec[2]) {
+    if (get(line, col) != X) return 0;
+    XMAS todo[3] = { M, A, S };
+    for (int i = 0; i < 3; i++) {
+        translate(&line, &col, vec);
+        if (!in_bounds(line, col)) return 0;
+        if (get(line, col) != todo[i]) return 0;
+    }
+    return 1;
+}
+
+int part1() {
+    int vectors[8][2] = {
+        { 1, 0 },
+        { -1, 0 },
+        { 0, 1 },
+        { 0, -1 },
+        { 1, 1 },
+        { 1, -1 },
+        { -1, 1 },
+        { -1, -1 },
+    };
+    int count = 0;
+    for (size_t line = 0; line < lines; line++) {
+        for (size_t col = 0; col < line_len; col++) {
+            for (int vec_idx = 0; vec_idx < 8; vec_idx++) {
+                count += check_vec(line, col, vectors[vec_idx]);
+            }
+        }
+    }
+    return count;
+}
+
+int m_or_s(XMAS v) {
+    return v == S || v == M;
+}
+
+int check_x(int line, int col) {
+    XMAS center = get(line, col);
+    if (center != A) return 0;
+    if (
+        !in_bounds(line-1, col-1)
+        || !in_bounds(line-1, col+1)
+        || !in_bounds(line+1, col-1)
+        || !in_bounds(line+1, col+1)
+    ) return 0;
+    XMAS top_left = get(line - 1, col - 1);
+    XMAS top_right = get(line - 1, col + 1);
+    XMAS bottom_left = get(line + 1, col - 1);
+    XMAS bottom_right = get(line + 1, col + 1);
+    return (
+        (m_or_s(top_left) && m_or_s(bottom_right) && top_left != bottom_right)
+        && (m_or_s(top_right) && m_or_s(bottom_left) && top_right != bottom_left)
+    );
+}
+
+int part2() {
+    int count = 0;
+    for (size_t line = 0; line < lines; line++) {
+        for (size_t col = 0; col < line_len; col++) {
+            count += check_x(line, col);
+        }
+    }
+    return count;
+}
+
+void solve(int *p1, int *p2) {
+    *p1 = part1();
+    *p2 = part2();
+}
+
+#endif // AOC_2024_04
+
+// =============================================================================

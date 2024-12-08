@@ -40,5 +40,5 @@ local:
 	$(CC) $(CFLAGS) -o $(BIN_DIR)/aoc local.c
 
 .PHONY: run
-run:
+run: local
 	@cat input.txt | ./bin/aoc
