@@ -36,10 +36,10 @@ improved. For instance, by making various arrays in the code just large enough
 to hold the input.
 
 | Problem | Flash \[bytes\] | RAM \[bytes\] | Notes |
-| --- | --- | --- |
+| --- | --- | --- | --- |
 | 2024-01 | 40108 | 11960 | |
 | 2024-02 | 39532 | 4044 | |
 | 2024-03 | 39872 | 4024 | |
 | 2024-04 | 39908 | 19964 | |
-| 2024-05 | | | doesn't work on arduino |
-| 2024-06 | | | only part 1 done |
+| 2024-05 | - | - | doesn't work on arduino |
+| 2024-06 | - | - | only part 1 done |
