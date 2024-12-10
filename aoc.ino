@@ -1,7 +1,7 @@
-#define AOC_2024_05
+#define AOC_2024_06
 #include "aoc.h"
 
-const unsigned long INACTIVITY_TRESHOLD = 100;
+unsigned long INACTIVITY_TRESHOLD = 100;
 unsigned long last_activity = millis();
 int solved = 0;
 

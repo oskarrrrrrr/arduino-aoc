@@ -1,4 +1,4 @@
-#define AOC_2024_05
+#define AOC_2024_06
 #include "aoc.h"
 
 #include <unistd.h>

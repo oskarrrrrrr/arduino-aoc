@@ -530,7 +530,7 @@ void on_byte(char byte) {
     if (byte == '\n') {
         if (!reading_rules) {
             part1();
-            // part2();
+            part2();
             curr_update_len = 0;
         }
         char_in_line = 0;
@@ -577,5 +577,139 @@ void solve(int *p1, int *p2) {
 }
 
 #endif // AOC_2024_05
+
+// =============================================================================
+
+#ifdef AOC_2024_06
+
+#include <string.h>
+#include <stdio.h>
+
+#define N 1000
+#define CELL_CAPACITY (sizeof(int) * 8)
+int _map[N]; // `map` is taken by Arduino
+int visited[N];
+size_t parse_idx;
+size_t rows;
+size_t cols;
+
+size_t guard_row;
+size_t guard_col;
+
+void reset() {
+    memset(_map, 0, sizeof(int) * N);
+    memset(visited, 0, sizeof(int) * N);
+    parse_idx = 0;
+    rows = 0;
+    cols = 0;
+}
+
+int get(int *arr, size_t cols, size_t row, size_t col) {
+    int idx = (row * cols) + col;
+    int cell = arr[idx / CELL_CAPACITY];
+    int offset = idx % CELL_CAPACITY;
+    return (cell >> offset) & 0b1;
+}
+
+void set(int *arr, size_t cols, size_t row, size_t col, int v) {
+    int idx = (row * cols) + col;
+    int *cell = &arr[idx / CELL_CAPACITY];
+    int offset = idx % CELL_CAPACITY;
+    *cell &= (-1) | (0b1 << offset);
+    *cell |= v << offset;
+}
+
+void on_byte(char byte) {
+    switch (byte) {
+    case '\n':
+        if (cols == 0) cols = parse_idx;
+        rows++;
+        break;
+    case '#': {
+        int c = (cols > 0) ? cols : 1;
+        set(_map, cols, parse_idx / c, parse_idx % cols, 1);
+        parse_idx++;
+        break;
+    }
+    case '^': {
+        int c = (cols > 0) ? cols : 1;
+        guard_row = parse_idx / c;
+        guard_col = parse_idx % cols;
+        parse_idx++;
+        break;
+    }
+    case '.':
+        parse_idx++;
+        break;
+    }
+}
+
+void debug_print() {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            char c = get(_map, cols, i, j) ? '#' : '.';
+            if (guard_row == i && guard_col == j) c = '^';
+            printf("%c", c);
+        }
+        printf("\n");
+    }
+}
+
+typedef enum { UP, RIGHT, DOWN, LEFT } Dir;
+
+void move_in_dir(Dir dir, int *row, int *col) {
+    switch (dir) {
+    case UP: *row -= 1; break;
+    case RIGHT: *col += 1; break;
+    case DOWN: *row += 1; break;
+    case LEFT: *col -= 1; break;
+    }
+}
+
+Dir dir_after_right_turn(Dir dir) {
+    switch (dir) {
+    case UP: return RIGHT;
+    case RIGHT: return DOWN;
+    case DOWN: return LEFT;
+    case LEFT: return UP;
+    }
+}
+
+int in_bounds(int row, int col) {
+    return (0 <= row && row < rows) && (0 <= col && col < cols);
+}
+
+int part1() {
+    Dir dir = UP;
+    int row = guard_row;
+    int col = guard_col;
+    while (in_bounds(row, col)) {
+        set(visited, cols, row, col, 1);
+        int prev_row = row, prev_col = col;
+        move_in_dir(dir, &row, &col);
+        while (get(_map, cols, row, col)) {
+            dir = dir_after_right_turn(dir);
+            row = prev_row; col = prev_col;
+            move_in_dir(dir, &row, &col);
+        }
+    }
+    int count = 0;
+    for (size_t row = 0; row < rows; row++) {
+        for (size_t col = 0; col < cols; col++) {
+            count += get(visited, cols, row, col);
+        }
+    }
+    return count;
+}
+
+int part2() {
+}
+
+void solve(int *p1, int *p2) {
+    *p1 = part1();
+    *p2 = part2();
+}
+
+#endif // AOC_2024_06
 
 // =============================================================================
