@@ -1,4 +1,4 @@
-# Adevnt of Code on Arduino
+# Advent of Code on Arduino
 
 [Advent of Code](https://adventofcode.com) on Arduino Uno R4 Minima.
 
@@ -7,7 +7,7 @@
 - Memory: 256 kB Flash, 32 kB RAM
 
 With 32kB of RAM, at least some of the problems should be possible to solve on
-an Arduino. I chose not to upload the input as a part of the program becuase I
+an Arduino. I chose not to upload the input as a part of the program because I
 think it's more interesting this way. As a result, every solution must handle
 reading the input character by character.
 
